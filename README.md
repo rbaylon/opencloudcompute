@@ -1,1 +1,1 @@
-# Subsystem a better alternative to containers
+# Open source cloud compute platform with container support.
