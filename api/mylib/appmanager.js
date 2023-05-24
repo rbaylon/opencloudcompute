@@ -64,15 +64,15 @@ class AppManager {
         }
     }
     getUserNames (){
-        var usernames = [];
-        for (var v of this.data.Users){
+        let usernames = [];
+        for (let v of this.data.Users){
             usernames.push(v.username);
         }
         return usernames;
     }
     getUserByName (username){
         let data = undefined;
-        for (var v of this.data.Users){
+        for (let v of this.data.Users){
             if (v.username === username){
                 data = v;
                 break;
@@ -104,7 +104,7 @@ class AppManager {
     }
     getTokenByTokenId(token_id) {
       let data = undefined;
-      for (var v of this.data.Tokens){
+      for (let v of this.data.Tokens){
         if (v.token_id == token_id){
           data = v;
           break;

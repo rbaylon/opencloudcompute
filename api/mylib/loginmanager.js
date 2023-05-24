@@ -1,5 +1,5 @@
-var jwt = require('jsonwebtoken');
-var crypto = require('crypto');
+let jwt = require('jsonwebtoken');
+let crypto = require('crypto');
 
 class LoginManager {
     constructor (secret) {
@@ -12,7 +12,7 @@ class LoginManager {
     }
     genToken (user, expr = undefined){
         expr = (expr) ? expr : this.tokenexpr;
-        var token = jwt.sign({
+        let token = jwt.sign({
             authuser: user, 
             expiry: expr,
             token_id: crypto.randomBytes(this.saltlen).toString('hex')
@@ -20,9 +20,9 @@ class LoginManager {
         return token;
     }
     verifyToken (token){
-        var decoded = {success: false, error: '', expiry: '', token_id: ''};
+        let decoded = {success: false, error: '', expiry: '', token_id: ''};
         try {
-            var ret = jwt.verify(token, this.secret);
+            let ret = jwt.verify(token, this.secret);
             decoded.authuser = ret.authuser;
             decoded.success = true;
             decoded.expiry = ret.expiry;
@@ -33,13 +33,13 @@ class LoginManager {
         return decoded;
     }
     genPasswordHash (password) {
-        var salt = crypto.randomBytes(this.saltlen).toString('hex');
-        var hash = crypto.pbkdf2Sync(password, salt, this.iter, this.hashlen, `sha512`).toString(`hex`);
+        let salt = crypto.randomBytes(this.saltlen).toString('hex');
+        let hash = crypto.pbkdf2Sync(password, salt, this.iter, this.hashlen, `sha512`).toString(`hex`);
         return hash+':'+salt;
     }
     checkPasswordHash (clearpw, hashedpw) {
-        var hpw = hashedpw.split(':');
-        var hash = crypto.pbkdf2Sync(clearpw, hpw[1], this.iter, this.hashlen, `sha512`).toString(`hex`);
+        let hpw = hashedpw.split(':');
+        let hash = crypto.pbkdf2Sync(clearpw, hpw[1], this.iter, this.hashlen, `sha512`).toString(`hex`);
         if (hash === hpw[0]){
             return true;
         } else {

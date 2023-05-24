@@ -1,31 +1,31 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+let createError = require('http-errors');
+let express = require('express');
+let path = require('path');
+let cookieParser = require('cookie-parser');
+let logger = require('morgan');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var tokenRouter = require('./routes/tokens');
+let indexRouter = require('./routes/index');
+let usersRouter = require('./routes/users');
+let tokenRouter = require('./routes/tokens');
 
 
-var app = express();
+let app = express();
 
 // load fullkube 
 const AppManager = require('./mylib/appmanager');
 apcfgfile = './cfg/config.json';
-ap = new AppManager(apcfgfile);
+let ap = new AppManager(apcfgfile);
 ap.loadConfig();
 app.set('ap', ap);
 
 // custom validator
 const InputValidator = require('./mylib/validators');
-iv = new InputValidator();
+let iv = new InputValidator();
 app.set('iv', iv);
 
 // Load login manager
 const LoginManager = require('./mylib/loginmanager');
-lm = new LoginManager(ap.data.secretkey);
+let lm = new LoginManager(ap.data.secretkey);
 app.set('lm', lm);
 
 // view engine setup

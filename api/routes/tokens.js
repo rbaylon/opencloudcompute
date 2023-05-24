@@ -1,11 +1,11 @@
-var express = require('express');
-var router = express.Router();
-var md = require('../mylib/middleware');
+let express = require('express');
+let router = express.Router();
+let md = require('../mylib/middleware');
 const crypto = require('crypto');
 
 /* GET users listing with CRUD */
-var roles = ["admin"];
-var schema_type = 'Tokens';
+let roles = ["admin"];
+let schema_type = 'Tokens';
 router.get('/', md.loginRequired(roles), function(req, res, next) {
   ap = req.app.get('ap');
   res.json({message: 'Get all tokens api', tokens: ap.data.Tokens});

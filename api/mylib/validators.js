@@ -32,7 +32,7 @@ class InputValidator {
         if (! this.strIsAlNum(user.username)) {
             return {message: "Username must not include special characters.", isOK: false};;
         }
-        for (var key in user) {
+        for (let key in user) {
             if (! this.sk.userKeys.includes(key)) {
                 return {message: `Invalid key: ${key}`, isOK: false};
             }
@@ -43,7 +43,7 @@ class InputValidator {
       if (typeof token.token === 'undefined' || typeof token.token_id === 'undefined' || typeof token.is_active === 'undefined' || typeof token.owner === 'undefined') {
         return {message: "missing parameter", isOK: false};
       }
-      for (var key in token) {
+      for (let key in token) {
         if (! this.sk.tokenKeys.includes(key)) {
           return {message: `Invalid key: ${key}`, isOK: false};
         }

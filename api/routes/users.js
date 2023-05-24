@@ -1,10 +1,10 @@
-var express = require('express');
-var router = express.Router();
-var md = require('../mylib/middleware');
+let express = require('express');
+let router = express.Router();
+let md = require('../mylib/middleware');
 
 /* GET users listing with CRUD */
-var roles = ["admin"];
-var schema_type = 'Users';
+let roles = ["admin"];
+let schema_type = 'Users';
 router.get('/', md.loginRequired(roles), function(req, res, next) {
   ap = req.app.get('ap');
   res.json({message: 'Get all users api', users: ap.data.Users});
