@@ -1,3 +1,4 @@
+"use strict";
 let createError = require('http-errors');
 let express = require('express');
 let path = require('path');
@@ -13,7 +14,7 @@ let app = express();
 
 // load fullkube 
 const AppManager = require('./mylib/appmanager');
-apcfgfile = './cfg/config.json';
+let apcfgfile = './cfg/config.json';
 let ap = new AppManager(apcfgfile);
 ap.loadConfig();
 app.set('ap', ap);

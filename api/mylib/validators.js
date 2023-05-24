@@ -1,3 +1,4 @@
+"use strict";
 const SchemaKeys = require("./utils");
 
 class InputValidator {

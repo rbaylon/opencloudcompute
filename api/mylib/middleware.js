@@ -1,3 +1,4 @@
+"use strict";
 function getUser (req, res, next){
     let ap = req.app.get('ap');
     let apuser = ap.getUser(req.params.id);

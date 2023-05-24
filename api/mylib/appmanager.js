@@ -1,3 +1,4 @@
+"use strict";
 const { writeFile, readFileSync } = require('fs');
 const LoginManager = require('./loginmanager');
 

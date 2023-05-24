@@ -1,3 +1,4 @@
+"use strict";
 class SchemaKeys {
     constructor () {
         this.userKeys = ["username", "password", "role"];
