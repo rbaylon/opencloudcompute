@@ -113,6 +113,13 @@ class AppManager {
       }
       return data;
     }
+    getTokenOwners (){
+        let owners = [];
+        for (let v of this.data.Tokens){
+            owners.push(v.owner);
+        }
+        return owners;
+    }
     getToken (id) {
         if (typeof this.data.Tokens[id] === 'undefined'){
             return undefined;

@@ -22,7 +22,7 @@ router.get('/', md.loginRequired(roles), function(req, res, next) {
     }
   }
 ).post(
-  '/new', md.loginRequired(roles), function(req, res){
+  '/new', md.loginRequired(roles), md.validateInput(schema_type), function(req, res){
     let ap = req.app.get('ap');
     let data = req.body;
     if ( typeof data.owner === 'undefined' || typeof data.expiry === 'undefined') { 
@@ -61,7 +61,7 @@ router.get('/', md.loginRequired(roles), function(req, res, next) {
     res.json({updated: ap.data.Tokens[req.params.id]});
   } 
 ).delete(
-  '/:id(\\d+)', md.loginRequired(roles), function(req, res){
+  '/:id(\\d+)', md.loginRequired(roles), md.validateInput(schema_type), function(req, res){
     let ap = req.app.get('ap');
     let rmtoken = ap.getToken(req.params.id);
     ap.rmToken(req.params.id);

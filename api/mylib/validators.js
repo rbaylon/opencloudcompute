@@ -40,16 +40,28 @@ class InputValidator {
         }
         return {message: "Input OK", isOK: true};
     }
-    validateToken (token) {
-      if (typeof token.token === 'undefined' || typeof token.token_id === 'undefined' || typeof token.is_active === 'undefined' || typeof token.owner === 'undefined') {
-        return {message: "missing parameter", isOK: false};
-      }
-      for (let key in token) {
-        if (! this.sk.tokenKeys.includes(key)) {
-          return {message: `Invalid key: ${key}`, isOK: false};
+    validateToken (token, newreq=false) {
+      if (newreq) {
+         if (typeof token.owner === 'undefined' || typeof token.expiry === 'undefined') {
+          return {message: "missing parameter", isOK: false};
         }
+        for (let key in token) {
+          if (! this.sk.tokenNewKeys.includes(key)) {
+            return {message: `Invalid key: ${key}`, isOK: false};
+          }
+        }
+        return {message: "Input OK", isOK: true};
+      } else {
+        if (typeof token.token === 'undefined' || typeof token.token_id === 'undefined' || typeof token.is_active === 'undefined' || typeof token.owner === 'undefined') {
+          return {message: "missing parameter", isOK: false};
+        }
+        for (let key in token) {
+          if (! this.sk.tokenKeys.includes(key)) {
+            return {message: `Invalid key: ${key}`, isOK: false};
+          }
+        }
+        return {message: "Input OK", isOK: true};
       }
-      return {message: "Input OK", isOK: true};
     }
 }
 

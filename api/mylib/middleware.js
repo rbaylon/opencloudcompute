@@ -32,9 +32,16 @@ function getUser (req, res, next){
           }
           break;
         case 'Tokens':
-          let vrt = iv.validateToken(req.body);
+          let newreq = false;
+          if (req.method == 'POST') newreq = true;
+          let vrt = iv.validateToken(req.body, newreq);
           if (vrt.isOK) {
-            next();
+            let owners = ap.getTokenOwners();
+            if (owners.includes(req.body.owner) && req.method == 'POST'){
+              res.status(409).json({message: req.body.username+" consumer token already exist."});
+            } else {
+              next();
+            }
           } else {
             res.status(400).json({message: vrt.message});
           }
