@@ -8,6 +8,10 @@ let logger = require('morgan');
 let indexRouter = require('./routes/index');
 let usersRouter = require('./routes/users');
 let tokenRouter = require('./routes/tokens');
+let iptablesRouter = require('./routes/iptables');
+let bridgesRouter = require('./routes/bridges');
+let interfacesRouter = require('./routes/interfaces');
+let ipaddressesRouter = require('./routes/ipaddresses');
 
 
 let app = express();
@@ -42,6 +46,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/tokens', tokenRouter);
+app.use('/api/net/iptables', iptablesRouter);
+app.use('/api/net/bridges', bridgesRouter);
+app.use('/api/net/interfaces', interfacesRouter);
+app.use('/api/net/ipaddresses', ipaddressesRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
