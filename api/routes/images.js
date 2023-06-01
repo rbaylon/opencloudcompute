@@ -6,10 +6,10 @@ const crypto = require('crypto');
 
 /* GET users listing with CRUD */
 let roles = ["admin", "consumer"];
-let schema_type = 'Bridges';
+let schema_type = 'Images';
 router.get('/', md.loginRequired(roles), function(req, res, next) {
   let ap = req.app.get('ap');
-  res.json({message: 'Get all bridge api', tokens: ap.data.bridges});
+  res.json({message: 'Get all machine image api', tokens: ap.data.images});
 })
 .get(
   '/:id(\\d+)', md.loginRequired(roles), function(req, res){

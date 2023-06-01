@@ -6,10 +6,10 @@ const crypto = require('crypto');
 
 /* GET users listing with CRUD */
 let roles = ["admin", "consumer"];
-let schema_type = 'IPaddresses';
+let schema_type = 'Vms';
 router.get('/', md.loginRequired(roles), function(req, res, next) {
   let ap = req.app.get('ap');
-  res.json({message: 'Get all network/ip api', tokens: ap.data.ipaddresses});
+  res.json({message: 'Get all virtual machine api', tokens: ap.data.vms});
 })
 .get(
   '/:id(\\d+)', md.loginRequired(roles), function(req, res){

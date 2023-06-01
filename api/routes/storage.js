@@ -6,10 +6,10 @@ const crypto = require('crypto');
 
 /* GET users listing with CRUD */
 let roles = ["admin", "consumer"];
-let schema_type = 'Interfaces';
+let schema_type = 'Storage';
 router.get('/', md.loginRequired(roles), function(req, res, next) {
   let ap = req.app.get('ap');
-  res.json({message: 'Get all interface api', tokens: ap.data.interfaces});
+  res.json({message: 'Get all storage api', tokens: ap.data.storage});
 })
 .get(
   '/:id(\\d+)', md.loginRequired(roles), function(req, res){
