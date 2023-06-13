@@ -1,13 +1,13 @@
 "use strict";
-let createError = require('http-errors');
-let express = require('express');
-let path = require('path');
-let cookieParser = require('cookie-parser');
-let logger = require('morgan');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const sequelize = require('./orm');
 
 let indexRouter = require('./routes/index');
 let usersRouter = require('./routes/users');
-let tokenRouter = require('./routes/tokens');
 
 
 let app = express();
@@ -41,12 +41,62 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/api/users', usersRouter);
-app.use('/api/tokens', tokenRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
 });
+
+// init db
+async function assertDatabaseConnectionOk() {
+	console.log(`Checking database connection...`);
+	try {
+		await sequelize.authenticate();
+		console.log('Database connection OK!');
+    if (ap.data.DB_INFO.create_tables) {
+      await sequelize.sync();
+      if(ap.data.first_run){
+        const { models } = require('./orm');
+        let admin_user = {
+          username: "admin",
+          password: lm.genPasswordHash(ap.data.admin_password),
+        };
+        let roles = ['admin', 'user', 'consumer'];
+        for (const role_name of roles){
+          await models.role.create({role_name: role_name});
+        }
+        await models.user.create(admin_user);
+        await models.UserRoles.bulkCreate([
+          {userId: 1, roleId: 1},
+          {userId: 1, roleId: 2},
+          {userId: 1, roleId: 3}
+        ]);
+        ap.data.admin_password = admin_user.password;
+        ap.data.first_run = false;
+      }
+      ap.data.DB_INFO.create_tables = false;
+      ap.saveConfig();
+    }
+    if (ap.data.DB_INFO.update_tables) { 
+      await sequelize.sync({ alter: true});
+      ap.data.DB_INFO.update_tables = false;
+      ap.saveConfig();
+    }
+	} catch (error) {
+		console.log('Unable to connect to the database:');
+		console.log(error.message);
+		process.exit(1);
+	}
+}
+
+
+
+async function db_init() {
+	await assertDatabaseConnectionOk();
+	console.log(`Starting Sequelize...Done`);
+}
+
+db_init(); 
 
 // error handler
 app.use(function(err, req, res, next) {

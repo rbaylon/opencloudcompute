@@ -1,5 +1,5 @@
 "use strict";
-const SchemaKeys = require("./utils");
+const { SchemaKeys }= require("./utils");
 
 class InputValidator {
     constructor () {
@@ -21,14 +21,26 @@ class InputValidator {
         return this.numPattern.test(input);
     }
     validateUser (user) {
-        if (! this.strLengthValid(user.username, 15, 3)){
+        if (user.username) {
+          if ( ! this.strLengthValid(user.username, 15, 3)){
             return {message: "Username length must be 3 to 15 characters.", isOK: false};
+          }
+        } else {
+          return {message: "username parameter required.", isOK: false};
         }
-        if (! this.strLengthValid(user.password, 30, 8)){
+        if (user.password) {
+          if (! this.strLengthValid(user.password, 30, 8)){
             return {message: "Password length must be 8 to 30 characters.", isOK: false};
+          }
+        } else {
+          return {message: "password parameter required.", isOK: false};
         }
-        if (! this.strLengthValid(user.role, 10, 2)){
+        if (user.role) {
+          if (! this.strLengthValid(user.role, 10, 2)){
             return {message: "Role length must be 2 to 10 characters.", isOK: false};
+          }
+        } else {
+          return {message: "role parameter required.", isOK: false};
         }
         if (! this.strIsAlNum(user.username)) {
             return {message: "Username must not include special characters.", isOK: false};;
@@ -40,6 +52,18 @@ class InputValidator {
         }
         return {message: "Input OK", isOK: true};
     }
+    validateUserPw(pw) {
+      if (! this.strLengthValid(pw, 30, 8)){
+        return {message: "Password length must be 8 to 30 characters.", isOK: false};
+      }
+      return {message: "Input OK", isOK: true};
+    } 
+    validateUserRole(role){
+      if (! this.strLengthValid(role, 10, 2)){
+        return {message: "Role length must be 2 to 10 characters.", isOK: false};
+      }
+      return {message: "Input OK", isOK: true};
+    } 
     validateToken (token, newreq=false) {
       if (newreq) {
          if (typeof token.owner === 'undefined' || typeof token.expiry === 'undefined') {

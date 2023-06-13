@@ -1,7 +1,15 @@
 {
-  "Users": [],
-  "password_set": false,
-  "password": "1234567890",
+  "first_run": true,
   "secretkey": 12345,
-  "Tokens": ""
+  "DB_INFO": {
+    "user": "",
+    "password": "",
+    "host": "",
+    "port": "",
+    "database": "",
+    "dialect": "",
+    "create_tables": true,
+    "update_tables": false
+  },
+  "admin_password": "123*45"
 }

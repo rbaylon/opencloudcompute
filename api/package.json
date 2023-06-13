@@ -14,7 +14,10 @@
     "jsonwebtoken": "",
     "morgan": "",
     "pm2": "",
-    "pug": ""
+    "pug": "",
+    "sequelize": "",
+    "pg": "",
+    "pg-hstore": ""
   },
   "devDependencies": {
     "jest": "",

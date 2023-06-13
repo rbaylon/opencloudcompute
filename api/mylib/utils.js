@@ -7,4 +7,14 @@ class SchemaKeys {
     }
 }
 
-module.exports = SchemaKeys;
+function getItemFromObjs(key, val, objs){
+  for(let obj of objs){
+    if (obj.get(key) == val) return obj;
+  }
+  return null;
+}
+
+module.exports = { 
+  SchemaKeys, 
+  getItemFromObjs
+};

@@ -9,15 +9,15 @@ class LoginManager {
         this.saltlen = 16;
         this.hashlen = 32;
         this.iter = 1000;
-        this.tokenexpr = 8760;
+        this.tokenexpr = 86400;
     }
     genToken (user, expr = undefined){
         expr = (expr) ? expr : this.tokenexpr;
+        let now = (expr*1000) + Date.now();
         let token = jwt.sign({
             authuser: user, 
-            expiry: expr,
-            token_id: crypto.randomBytes(this.saltlen).toString('hex')
-          }, this.secret, { expiresIn: this.tokenexpr });
+            expiry: new Date(now)
+          }, this.secret, { expiresIn: expr });
         return token;
     }
     verifyToken (token){

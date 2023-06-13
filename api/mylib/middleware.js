@@ -1,97 +1,144 @@
 "use strict";
-function getUser (req, res, next){
-    let ap = req.app.get('ap');
-    let apuser = ap.getUser(req.params.id);
-    if(typeof apuser === 'undefined'){
-      res.status(404).json({message: 'Resource '+req.params.id+' not found.'});
-    } else {
+const { getItemFromObjs } = require('../mylib/utils'); 
+const { models } = require('../orm');
+
+function sendError(res, payload, ok){
+  if(ok){
+    res.status(payload.statuscode).json({message: payload.message});
+    return false;
+  } else {
+    return true;
+  }
+}
+
+async function getUser (req, res, next){
+    let apuser = await models.user.findOne({where: { id: req.params.id }, include: models.role});
+    if(apuser){
       req.user = apuser;
       next();
+    } else {
+      res.status(404).json({message: 'Resource '+req.params.id+' not found.'});
     }
   }
   
   function validateInput (schema_type) {
-    return function(req, res, next) {
+    return async function(req, res, next) {
       let iv = req.app.get('iv');
       let ap = req.app.get('ap');
+      let sendErr = true;
       if (! req.body){
-        res.status(422).json({message: "Empty request body!"});
+        sendErr = sendError(res, {statuscode: 422, message: "Empty request body!"}, sendErr);
       }
       switch (schema_type) {
         case 'Users':
-          let vru = iv.validateUser(req.body);
-          if (vru.isOK) {
-            let usernames = ap.getUserNames();
-            if (usernames.includes(req.body.username) && req.method == 'POST'){
-              res.status(409).json({message: req.body.username+" username already exist."});
+          if (req.method == 'POST'){
+            let vru = iv.validateUser(req.body);
+            if (vru.isOK) {
+              let userdata = await models.user.findOne({where: {username: req.body.username}, include: models.role});
+              if (userdata){
+                sendErr = sendError(res, {statuscode: 409, message: req.body.username+" username already exist."}, sendErr);
+              } else {
+                let role = await models.role.findOne({where: {role_name: req.body.role}});
+                if (role){
+                  req.role = role;
+                  sendErr = false;
+                  next();
+                } else {
+                  sendErr = sendError(res, {statuscode: 404, message: `Role ${req.body.role} not found.`}, sendErr);
+                }
+              }
             } else {
+              sendErr = sendError(res, {statuscode: 400, message: vru.message}, sendErr);
+            }
+          } else if (req.method == 'PUT'){
+            let userdata = await models.user.findOne({where: {id: req.params.id}, include: models.role});
+            if (userdata){
+              req.userdata = userdata;
+            } else {
+              sendErr = sendError(res, {statuscode: 404, message: `User ID ${req.params.id} not found.`}, sendErr);
+            }
+            if (req.body.role) {
+              let vruk = iv.validateUserRole(req.body.role);
+              if (vruk.isOK) {
+                let roledata = req.body.role;
+                if (req.body.role.match(/^\-/)){
+                  roledata = roledata.replace('-','');
+                }
+                let role = await models.role.findOne({where: {role_name: roledata}});
+                if (role){
+                  req.role = role;
+                } else {
+                  sendErr = sendError(res, {statuscode: 404, message: `Role ${req.body.role} not found!`}, sendErr);
+                }
+              } else {
+                sendErr = sendError(res, {statuscode: 400, message: vruk.message}, sendErr);
+              }
+            }
+            if (req.body.password) {
+              let vruk = iv.validateUserPw(req.body.password);
+              if (! vruk.isOK) {
+                sendErr = sendError(res, {statuscode: 400, message: vruk.message}, sendErr);
+              }
+            }
+            if(req.body.role || req.body.password) {
+              sendErr = false;
               next();
+            } else {
+              sendErr = sendError(res, {statuscode: 400, message: 'role or password parameter required.'}, sendErr);
             }
           } else {
-            res.status(400).json({message: vru.message});   
-          }
-          break;
-        case 'Tokens':
-          let newreq = false;
-          if (req.method == 'POST') newreq = true;
-          let vrt = iv.validateToken(req.body, newreq);
-          if (vrt.isOK) {
-            let owners = ap.getTokenOwners();
-            if (owners.includes(req.body.owner) && req.method == 'POST'){
-              res.status(409).json({message: req.body.username+" consumer token already exist."});
-            } else {
-              next();
-            }
-          } else {
-            res.status(400).json({message: vrt.message});
+            sendErr = sendError(res, {statuscode: 405, message: `Method not allowed: ${req.method}.`}, sendErr);
           }
           break;
       }
+      req.resSent = sendErr;
     }
   }
   
-  function loginRequired(roles){
-		return function(req, res, next){
+ function loginRequired(roles){
+		return async function(req, res, next){
+      let sendErr = true;
     	let lm = req.app.get('lm');
     	const token = (req.headers.authorization || '').split(' ')[1] || '';
     	if (token){
       	let decoded = lm.verifyToken(token);
       	if (decoded.success) {
-					let ap = req.app.get('ap');
-					let userrecord = ap.getUserByName(decoded.authuser);
-					if (roles.includes(userrecord.role)) {
-            let tokenrecord = ap.getTokenByTokenId(decoded.token_id);
+					let userrecord = await models.user.findOne({where: {username: decoded.authuser}, include: models.role});
+          let userrole = null;
+          if(userrecord) {
+            userrole = getItemFromObjs('role_name', 'admin', userrecord.get('roles'));
+          } else {
+            sendErr = sendError(res, {statuscode: 400, message: `Access denied for user ${userrecord.username}!`}, sendErr);
+          }
+					if (userrole && roles.includes(userrole.get('role_name'))) {
+            let tokenrecord = await models.token.findOne({where: {token: token}});
             if (tokenrecord){
-              if (! tokenrecord.is_active) {
-                res.status(400).json({message: `Access denied for consumer ${tokenrecord.owner}!`});
-              } else {
-                next();
-              }
+              req.username = decoded.authuser;
+              sendErr = false;
+              next();
             } else {
-        		  req.username = decoded.authuser;
-        		  next();
+               sendErr = sendError(res, {statuscode: 400, message: `Access denied for user ${userrecord.username}!`}, sendErr);
             }
 					} else {
-						res.status(400).json({message: `Access denied for user ${userrecord.username}!`});
+            sendErr = sendError(res, {statuscode: 400, message: `Access denied for user ${userrecord.username}!`}, sendErr);
 					}
       	} else {
-        	res.status(400).json(decoded.error);
+          sendErr = sendError(res, {statuscode: 400, message: decoded.error}, sendErr);
       	}
     	} else {
-      	res.status(400).json({message: "Token required!"});
+        sendErr = sendError(res, {statuscode: 400, message: "Token required!"}, sendErr);
     	}
   	}
 	}
   
-  function checkPassword(req, res, next){
+async function checkPassword(req, res, next){
     const reqauth = (req.headers.authorization || '').split(' ')[1] || '';
     const [user, passwd] = Buffer.from(reqauth, 'base64').toString().split(':');
-    let ap = req.app.get('ap');
     let lm = req.app.get('lm');
-    let userrecord = ap.getUserByName(user);
+    let userrecord = await models.user.findOne({where: {username: user}});
     if (userrecord){
-      if (lm.checkPasswordHash(passwd, userrecord.password)){
-        req.username = userrecord.username;
+      if (lm.checkPasswordHash(passwd, userrecord.get('password'))){
+        req.username = userrecord.get('username');
         next();
       } else {
         res.status(400).json({message: "Invalid password."});
@@ -101,4 +148,4 @@ function getUser (req, res, next){
     }
   }
 
-module.exports = { checkPassword, loginRequired, validateInput, getUser };
+module.exports = { checkPassword, loginRequired, validateInput, getUser, sendError };
